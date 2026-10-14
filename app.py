@@ -1,0 +1,932 @@
+import random
+import streamlit as st
+
+st.set_page_config(page_title="AI Quiz Game | Units I & II", page_icon="🧠", layout="centered")
+
+QUESTIONS = [
+  {
+    "id": 1,
+    "type": "MCQ",
+    "topic": "Foundations of AI",
+    "question": "Which statement best describes Artificial Intelligence?",
+    "answer": "Create systems that perform tasks requiring abilities such as reasoning or learning",
+    "options": [
+      "Create systems that perform tasks requiring abilities such as reasoning or learning",
+      "Only store large amounts of data",
+      "Only perform arithmetic",
+      "Replace every human decision"
+    ],
+    "explanation": "AI focuses on systems that can perform tasks associated with intelligent behaviour.",
+    "hint": "Think about reasoning, learning and decision-making.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 2,
+    "type": "MCQ",
+    "topic": "Foundations of AI",
+    "question": "A hospital uses a model to flag X-rays that may show disease. This is an example of:",
+    "answer": "AI applied to healthcare",
+    "options": [
+      "AI applied to healthcare",
+      "A production system only",
+      "A Turing Test",
+      "A constraint with no variables"
+    ],
+    "explanation": "Medical image analysis is a real-world AI application.",
+    "hint": "Identify the domain in which the system is used.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 3,
+    "type": "MCQ",
+    "topic": "Foundations of AI",
+    "question": "A navigation app estimates traffic and suggests a faster route. Which AI capability is most directly involved?",
+    "answer": "Decision-making using available information",
+    "options": [
+      "Decision-making using available information",
+      "Physical manufacturing only",
+      "A fixed answer key",
+      "Manual sorting of paper maps"
+    ],
+    "explanation": "The system uses information to choose a useful route.",
+    "hint": "It selects an action based on current conditions.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 4,
+    "type": "Scenario",
+    "topic": "Foundations of AI",
+    "question": "A shop wants to group customers with similar purchasing patterns without pre-labelled groups. Which approach is most suitable?",
+    "answer": "Unsupervised learning",
+    "options": [
+      "Supervised learning",
+      "Unsupervised learning",
+      "Turing Test",
+      "Breadth-First Search"
+    ],
+    "explanation": "Unsupervised learning can discover patterns or groups in unlabelled data.",
+    "hint": "The groups are not supplied beforehand.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 5,
+    "type": "MCQ",
+    "topic": "Turing Test",
+    "question": "What is the central idea of the Turing Test?",
+    "answer": "Assess whether a machine's conversational behaviour can be distinguished from a human's",
+    "options": [
+      "Measure the computer's storage capacity",
+      "Assess whether a machine's conversational behaviour can be distinguished from a human's",
+      "Check whether a program uses BFS",
+      "Measure network speed"
+    ],
+    "explanation": "The test concerns behaviour in conversation, not computer hardware.",
+    "hint": "Think of a human judge communicating with an unseen participant.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 6,
+    "type": "True/False",
+    "topic": "Turing Test",
+    "question": "Passing a Turing Test proves that a machine has human feelings and consciousness.",
+    "answer": "False",
+    "options": [
+      "True",
+      "False"
+    ],
+    "explanation": "The test evaluates observable conversational behaviour; it does not prove consciousness.",
+    "hint": "Does behaviour alone establish inner experience?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 7,
+    "type": "MCQ",
+    "topic": "Rational Agents",
+    "question": "A rational agent chooses an action mainly to:",
+    "answer": "Maximize expected performance based on available information",
+    "options": [
+      "Always copy the previous action",
+      "Maximize expected performance based on available information",
+      "Choose randomly in every situation",
+      "Guarantee perfect knowledge of the future"
+    ],
+    "explanation": "Rationality is judged against the performance measure and information available.",
+    "hint": "Rational does not mean omniscient.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 8,
+    "type": "True/False",
+    "topic": "Rational Agents",
+    "question": "A rational agent must always know the complete state of its environment.",
+    "answer": "False",
+    "options": [
+      "True",
+      "False"
+    ],
+    "explanation": "Agents often act with partial information and uncertainty.",
+    "hint": "Consider partially observable environments.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 9,
+    "type": "Scenario",
+    "topic": "Rational Agents",
+    "question": "A vacuum robot detects dirt in its current square and has enough battery to clean. Which action is most rational?",
+    "answer": "Clean the square",
+    "options": [
+      "Move away immediately",
+      "Clean the square",
+      "Switch off permanently",
+      "Ignore the sensor"
+    ],
+    "explanation": "Cleaning directly improves the cleanliness goal when dirt is detected.",
+    "hint": "Choose the action that improves its performance measure.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 10,
+    "type": "Match",
+    "topic": "Intelligent Agents",
+    "question": "Match the AI agent component to its role: (1) Sensors (2) Actuators. Which pairing is correct?",
+    "answer": "1–observe the environment; 2–carry out actions",
+    "options": [
+      "1–observe the environment; 2–carry out actions",
+      "1–carry out actions; 2–observe the environment",
+      "Both only store the goal state",
+      "Neither interacts with the environment"
+    ],
+    "explanation": "Sensors receive percepts from the environment; actuators perform actions that affect it.",
+    "hint": "One component observes, the other acts.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 11,
+    "type": "MCQ",
+    "topic": "Intelligent Agents",
+    "question": "An agent affects its environment through:",
+    "answer": "Actuators",
+    "options": [
+      "Actuators",
+      "Sensors",
+      "Percepts",
+      "A heuristic estimate only"
+    ],
+    "explanation": "Actuators carry out actions.",
+    "hint": "Which component performs actions?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 12,
+    "type": "Scenario",
+    "topic": "Agents and Environments",
+    "question": "A self-driving car observes lanes, nearby vehicles and traffic lights, then steers and brakes. The lanes and vehicles are part of its:",
+    "answer": "Environment",
+    "options": [
+      "Environment",
+      "Actuators",
+      "Performance measure",
+      "Internal program only"
+    ],
+    "explanation": "The environment includes the external world the agent senses and acts upon.",
+    "hint": "What surrounds the agent?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 13,
+    "type": "MCQ",
+    "topic": "Good Behaviour",
+    "question": "Which is the best description of an agent's performance measure?",
+    "answer": "A criterion used to evaluate how well the agent achieves its objectives",
+    "options": [
+      "A list of its source-code lines",
+      "A criterion used to evaluate how well the agent achieves its objectives",
+      "The number of sensors it owns",
+      "The size of its display"
+    ],
+    "explanation": "A performance measure defines what counts as successful behaviour.",
+    "hint": "It evaluates outcomes, not code length.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 14,
+    "type": "Assertion–Reason",
+    "topic": "Nature of Environments",
+    "question": "Assertion (A): BFS is complete when the branching factor is finite. Reason (R): BFS explores the search tree level by level.",
+    "answer": "A. Both A and R are true, and R correctly explains A",
+    "options": [
+      "A. Both A and R are true, and R correctly explains A",
+      "B. Both A and R are true, but R does not explain A",
+      "C. A is true, but R is false",
+      "D. A is false, but R is true"
+    ],
+    "explanation": "BFS explores all nodes at each depth before going deeper, so with a finite branching factor it will reach a goal at a finite depth.",
+    "hint": "BFS systematically explores shallower levels before deeper ones.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 15,
+    "type": "MCQ",
+    "topic": "Nature of Environments",
+    "question": "A chess game is usually considered:",
+    "answer": "Deterministic and fully observable",
+    "options": [
+      "Partially observable and continuously changing",
+      "Deterministic and fully observable",
+      "Unknown and without states",
+      "A simple reflex agent"
+    ],
+    "explanation": "Standard chess has visible pieces and deterministic legal moves, although an opponent makes it strategic.",
+    "hint": "Can players see the board and predict the result of a legal move, assuming no opponent action in between?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 16,
+    "type": "Scenario",
+    "topic": "Nature of Environments",
+    "question": "A delivery robot operates in busy streets where pedestrians and cars move unpredictably. The environment is best described as:",
+    "answer": "Dynamic and stochastic",
+    "options": [
+      "Static and deterministic",
+      "Dynamic and stochastic",
+      "Fully predictable and unchanging",
+      "A single fixed state"
+    ],
+    "explanation": "Other road users change the environment and introduce uncertainty.",
+    "hint": "Things change while the robot is operating.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 17,
+    "type": "MCQ",
+    "topic": "Problems and Problem Spaces",
+    "question": "Which set most commonly defines a search problem?",
+    "answer": "Initial state, actions, transition model, goal test and path cost",
+    "options": [
+      "Only a goal name",
+      "Initial state, actions, transition model, goal test and path cost",
+      "Only the programming language",
+      "Only the number of operators"
+    ],
+    "explanation": "These components describe the problem and how solutions are evaluated.",
+    "hint": "Think about where you start, what you can do and how success is tested.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 18,
+    "type": "MCQ",
+    "topic": "State Space Search",
+    "question": "In a state-space graph, a node usually represents:",
+    "answer": "A state of the problem",
+    "options": [
+      "A state of the problem",
+      "Only a source-code comment",
+      "A performance score only",
+      "A sensor brand"
+    ],
+    "explanation": "Search nodes represent possible problem states.",
+    "hint": "What does the search explore?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 19,
+    "type": "Problem-solving",
+    "topic": "State Space Search",
+    "question": "A graph has edges S→A, S→B, A→C and B→G. With BFS and neighbours explored in the listed order, which node is visited immediately after A is expanded?",
+    "answer": "B",
+    "options": [
+      "C",
+      "B",
+      "G",
+      "S"
+    ],
+    "explanation": "BFS expands nodes in queue order. After expanding S, A and B are queued; after A, B is next.",
+    "hint": "Trace the FIFO queue: start at S, then add A and B.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 20,
+    "type": "Problem-solving",
+    "topic": "State Space Search",
+    "question": "A maze has equal step costs. You need a solution with the fewest moves. Which uninformed search is appropriate?",
+    "answer": "Breadth-First Search",
+    "options": [
+      "Depth-First Search",
+      "Breadth-First Search",
+      "Hill Climbing",
+      "Random walk"
+    ],
+    "explanation": "BFS finds a shallowest solution in an unweighted graph when the branching factor is finite.",
+    "hint": "Equal step costs make depth correspond to number of moves.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 21,
+    "type": "Match",
+    "topic": "Production Systems",
+    "question": "Match the production-system component to its role: (1) Rules (2) Working memory (3) Control strategy.",
+    "answer": "1–IF–THEN knowledge; 2–current facts or state; 3–chooses which applicable rule to use",
+    "options": [
+      "1–IF–THEN knowledge; 2–current facts or state; 3–chooses which applicable rule to use",
+      "1–current facts; 2–chooses a rule; 3–IF–THEN knowledge",
+      "1–sensor hardware; 2–actuator hardware; 3–goal location",
+      "All three mean the same thing"
+    ],
+    "explanation": "Rules encode condition-action knowledge, working memory stores current facts, and the control strategy selects among applicable rules.",
+    "hint": "Separate stored knowledge, current facts and rule selection.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 22,
+    "type": "Fill",
+    "topic": "Production Systems",
+    "question": "A production rule is often written in the form IF condition THEN _____.",
+    "answer": "action",
+    "options": [],
+    "explanation": "The THEN part specifies an action or conclusion to perform when the condition holds.",
+    "hint": "What follows the THEN keyword?",
+    "difficulty": "Medium",
+    "accepted": [
+      "an action",
+      "an action or conclusion",
+      "an action or conclusion to perform"
+    ]
+  },
+  {
+    "id": 23,
+    "type": "MCQ",
+    "topic": "Problem Characteristics",
+    "question": "A problem is decomposable when it can be:",
+    "answer": "Broken into smaller subproblems that can be solved separately",
+    "options": [
+      "Solved only by guessing",
+      "Broken into smaller subproblems that can be solved separately",
+      "Represented without states",
+      "Solved only with DFS"
+    ],
+    "explanation": "Decomposition is useful when parts of a problem can be handled separately.",
+    "hint": "Can the task be split into smaller tasks?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 24,
+    "type": "MCQ",
+    "topic": "Issues in Search Program Design",
+    "question": "Why is repeated-state detection useful in graph search?",
+    "answer": "It avoids revisiting states and wasting work",
+    "options": [
+      "It guarantees every heuristic is correct",
+      "It avoids revisiting states and wasting work",
+      "It removes the need for a goal test",
+      "It makes every problem deterministic"
+    ],
+    "explanation": "Visited-state tracking can prevent loops and redundant exploration.",
+    "hint": "Imagine a graph containing a cycle.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 25,
+    "type": "Assertion–Reason",
+    "topic": "Issues in Search Program Design",
+    "question": "Assertion (A): Successor order can affect which solution DFS finds first. Reason (R): DFS follows one branch deeply before exploring other branches.",
+    "answer": "A. Both A and R are true, and R correctly explains A",
+    "options": [
+      "A. Both A and R are true, and R correctly explains A",
+      "B. Both A and R are true, but R does not explain A",
+      "C. A is true, but R is false",
+      "D. A is false, but R is true"
+    ],
+    "explanation": "DFS commits to one branch at a time, so changing successor order can change the first branch explored and the first solution found.",
+    "hint": "Consider what happens if the left and right branches are swapped.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 26,
+    "type": "Match",
+    "topic": "BFS and DFS",
+    "question": "Match each search method to its usual data structure: (1) BFS (2) DFS.",
+    "answer": "1–Queue; 2–Stack",
+    "options": [
+      "1–Queue; 2–Stack",
+      "1–Stack; 2–Queue",
+      "1–Priority queue by heuristic; 2–Queue",
+      "Both require only a random number generator"
+    ],
+    "explanation": "BFS uses a FIFO queue; DFS uses stack behaviour, either explicitly or through recursion.",
+    "hint": "BFS is first-in-first-out; DFS is last-in-first-out.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 27,
+    "type": "MCQ",
+    "topic": "BFS and DFS",
+    "question": "Which data structure is commonly associated with iterative DFS?",
+    "answer": "Stack",
+    "options": [
+      "Queue",
+      "Stack",
+      "Sorted table of costs only",
+      "Random number generator"
+    ],
+    "explanation": "DFS uses last-in, first-out behaviour, implemented with a stack or recursion.",
+    "hint": "Think last in, first out.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 28,
+    "type": "Assertion–Reason",
+    "topic": "BFS and DFS",
+    "question": "Assertion (A): DFS is guaranteed to find the shortest path in every unweighted graph. Reason (R): DFS explores nodes level by level.",
+    "answer": "E. Both A and R are false",
+    "options": [
+      "A. Both A and R are true, and R correctly explains A",
+      "B. Both A and R are true, but R does not explain A",
+      "C. A is true, but R is false",
+      "D. A is false, but R is true",
+      "E. Both A and R are false"
+    ],
+    "explanation": "Both A and R are false: DFS is not guaranteed to find the shortest path, and level-by-level exploration describes BFS, not DFS.",
+    "hint": "Check whether the reason describes BFS or DFS.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 29,
+    "type": "Problem-solving",
+    "topic": "BFS and DFS",
+    "question": "Starting at S, successors are explored left to right: S has children A and B; A has children C and D. Which node does DFS visit immediately after A, assuming A is expanded before B?",
+    "answer": "C",
+    "options": [
+      "B",
+      "C",
+      "D",
+      "S"
+    ],
+    "explanation": "DFS continues down the current branch, so C is visited next under left-to-right traversal.",
+    "hint": "Follow the leftmost branch as deeply as possible.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 30,
+    "type": "MCQ",
+    "topic": "Iterative Deepening",
+    "question": "Iterative Deepening Search repeatedly runs depth-limited DFS with:",
+    "answer": "Increasing depth limits",
+    "options": [
+      "Decreasing branching factors",
+      "Increasing depth limits",
+      "A random goal each time",
+      "No depth limit"
+    ],
+    "explanation": "The limit increases until a solution is found.",
+    "hint": "What changes from one iteration to the next?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 31,
+    "type": "MCQ",
+    "topic": "Iterative Deepening",
+    "question": "Why can iterative deepening be useful?",
+    "answer": "It combines low memory use with finding shallow solutions under suitable conditions",
+    "options": [
+      "It never revisits nodes",
+      "It combines low memory use with finding shallow solutions under suitable conditions",
+      "It requires the complete state space in memory",
+      "It only works on weighted graphs"
+    ],
+    "explanation": "It uses DFS-like memory while progressively exploring deeper levels.",
+    "hint": "Think of BFS's shallow solution property and DFS's memory use.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 32,
+    "type": "MCQ",
+    "topic": "Hill Climbing",
+    "question": "Hill climbing selects a move based mainly on:",
+    "answer": "The evaluation of neighbouring states",
+    "options": [
+      "The evaluation of neighbouring states",
+      "The oldest node in a queue",
+      "A random path regardless of value",
+      "The alphabetic order of states"
+    ],
+    "explanation": "It moves to a neighbour that appears better according to an evaluation function.",
+    "hint": "It uses local evaluation rather than a full frontier queue.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 33,
+    "type": "Scenario",
+    "topic": "Hill Climbing",
+    "question": "A timetable optimizer keeps improving the schedule but stops at a solution better than nearby schedules, while a much better schedule exists elsewhere. This illustrates:",
+    "answer": "A local optimum",
+    "options": [
+      "A local optimum",
+      "A perfect global optimum",
+      "A queue overflow",
+      "A Turing Test"
+    ],
+    "explanation": "A local optimum is better than neighbouring states but not necessarily the best overall.",
+    "hint": "The search cannot see a better distant region through its local moves.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 34,
+    "type": "MCQ",
+    "topic": "Hill Climbing",
+    "question": "Random-restart hill climbing attempts to reduce the risk of getting stuck by:",
+    "answer": "Starting the search again from different initial states",
+    "options": [
+      "Starting the search again from different initial states",
+      "Removing the evaluation function",
+      "Always choosing the worst neighbour",
+      "Storing every possible path"
+    ],
+    "explanation": "Different starting points may lead to different regions of the search space.",
+    "hint": "What changes between attempts?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 35,
+    "type": "MCQ",
+    "topic": "Hill Climbing",
+    "question": "In stochastic hill climbing, the next move may be selected by:",
+    "answer": "Randomly choosing among eligible improving moves",
+    "options": [
+      "Always choosing the alphabetically first state",
+      "Randomly choosing among eligible improving moves",
+      "Using BFS only",
+      "Ignoring neighbouring states"
+    ],
+    "explanation": "Stochastic variants introduce randomness into move selection.",
+    "hint": "The name points to a probabilistic choice.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 36,
+    "type": "Assertion–Reason",
+    "topic": "Heuristic Search",
+    "question": "Assertion (A): A heuristic can guide a search toward promising states. Reason (R): A heuristic estimates how close a state is to a goal or the remaining cost.",
+    "answer": "A. Both A and R are true, and R correctly explains A",
+    "options": [
+      "A. Both A and R are true, and R correctly explains A",
+      "B. Both A and R are true, but R does not explain A",
+      "C. A is true, but R is false",
+      "D. A is false, but R is true"
+    ],
+    "explanation": "A heuristic provides an estimate that can help the search prioritize states likely to lead toward the goal.",
+    "hint": "A heuristic is an estimate used to guide exploration.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 37,
+    "type": "MCQ",
+    "topic": "Best First Search",
+    "question": "Greedy Best-First Search typically selects the frontier node with the smallest:",
+    "answer": "Heuristic value h(n)",
+    "options": [
+      "Path cost so far g(n) only",
+      "Heuristic value h(n)",
+      "Depth in every implementation",
+      "Number of parents"
+    ],
+    "explanation": "Greedy Best-First Search prioritizes estimated distance to the goal.",
+    "hint": "Which value estimates how close the node is to the goal?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 38,
+    "type": "Match",
+    "topic": "Best First Search",
+    "question": "Match the search term to its meaning: (1) g(n) in cost-based search (2) h(n) in heuristic search.",
+    "answer": "1–cost so far; 2–estimated remaining cost to goal",
+    "options": [
+      "1–cost so far; 2–estimated remaining cost to goal",
+      "1–estimated remaining cost; 2–cost already paid",
+      "1–number of sensors; 2–number of actuators",
+      "Both always equal the total path cost"
+    ],
+    "explanation": "g(n) commonly denotes the cost accumulated so far; h(n) estimates the cost remaining to reach a goal.",
+    "hint": "One is past/accumulated cost, the other is an estimate of what remains.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 39,
+    "type": "Scenario",
+    "topic": "Heuristic Search",
+    "question": "A route planner uses straight-line distance to the destination to guide exploration. Straight-line distance is being used as:",
+    "answer": "A heuristic",
+    "options": [
+      "A production rule",
+      "A heuristic",
+      "A goal test only",
+      "A sensor actuator"
+    ],
+    "explanation": "Straight-line distance estimates remaining travel distance.",
+    "hint": "It is an estimate used to guide search.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 40,
+    "type": "MCQ",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "A CSP is made up of:",
+    "answer": "Variables, domains and constraints",
+    "options": [
+      "Variables, domains and constraints",
+      "Only actions and path costs",
+      "Only sensors and actuators",
+      "A queue, stack and timer"
+    ],
+    "explanation": "CSPs define variables, their possible values and restrictions on combinations.",
+    "hint": "What are the three standard components?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 41,
+    "type": "Assertion–Reason",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "Assertion (A): A CSP includes variables, domains and constraints. Reason (R): Constraints specify which combinations of variable values are allowed.",
+    "answer": "A. Both A and R are true, and R correctly explains A",
+    "options": [
+      "A. Both A and R are true, and R correctly explains A",
+      "B. Both A and R are true, but R does not explain A",
+      "C. A is true, but R is false",
+      "D. A is false, but R is true"
+    ],
+    "explanation": "The three standard parts of a CSP are variables, domains of possible values, and constraints that restrict valid assignments.",
+    "hint": "Think about what makes a variable assignment valid or invalid.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 42,
+    "type": "Match",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "Match the CSP term to its meaning: (1) Variable (2) Domain (3) Constraint.",
+    "answer": "1–item to assign; 2–allowed values; 3–restriction on assignments",
+    "options": [
+      "1–item to assign; 2–allowed values; 3–restriction on assignments",
+      "1–restriction; 2–item to assign; 3–allowed values",
+      "1–goal test; 2–path cost; 3–queue order",
+      "All three refer to possible actions only"
+    ],
+    "explanation": "Variables need values, domains list the values they may take, and constraints limit valid combinations.",
+    "hint": "Identify what receives a value, which values are possible, and what restricts them.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 43,
+    "type": "MCQ",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "In a CSP, the domain of a variable is:",
+    "answer": "The set of values it is allowed to take",
+    "options": [
+      "The set of values it is allowed to take",
+      "The set of all source files",
+      "The list of already failed algorithms",
+      "The goal test result only"
+    ],
+    "explanation": "Domains define allowed values for variables.",
+    "hint": "Which values are available for assignment?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 44,
+    "type": "Problem-solving",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "Three adjacent regions A, B and C must have different colours for neighbours. A is red and B is blue. If C neighbours B but not A, which colour can C use from {red, blue, green}?",
+    "answer": "Red or green",
+    "options": [
+      "Blue only",
+      "Red or green",
+      "Blue or green",
+      "Red only"
+    ],
+    "explanation": "C cannot be blue because it neighbours B. It may be red or green because it does not neighbour A.",
+    "hint": "Apply only the constraints involving C.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 45,
+    "type": "MCQ",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "The backtracking algorithm for CSPs typically works by:",
+    "answer": "Assigning values incrementally and undoing assignments when a conflict occurs",
+    "options": [
+      "Assigning values incrementally and undoing assignments when a conflict occurs",
+      "Ignoring constraints until the end in every case",
+      "Using only a heuristic distance to a goal",
+      "Expanding nodes strictly by level"
+    ],
+    "explanation": "Backtracking explores assignments and returns to an earlier variable after failure.",
+    "hint": "What happens when a partial assignment cannot work?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 46,
+    "type": "Scenario",
+    "topic": "Constraint Satisfaction Problems",
+    "question": "A school timetable has variables for classes, domains of available periods and rules preventing room clashes. This is best modelled as:",
+    "answer": "A Constraint Satisfaction Problem",
+    "options": [
+      "A Turing Test",
+      "A Constraint Satisfaction Problem",
+      "A simple queue",
+      "A fully specified production rule only"
+    ],
+    "explanation": "The task assigns values to variables while satisfying constraints.",
+    "hint": "Identify variables, possible values and restrictions.",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 47,
+    "type": "MCQ",
+    "topic": "Means-End Analysis",
+    "question": "Means-End Analysis begins by comparing:",
+    "answer": "The current state with the goal state",
+    "options": [
+      "The current state with the goal state",
+      "The names of two programming languages",
+      "The queue with the stack",
+      "The number of sensors with actuators"
+    ],
+    "explanation": "The method identifies differences between current and desired states.",
+    "hint": "What is the gap the method tries to reduce?",
+    "difficulty": "Easy"
+  },
+  {
+    "id": 48,
+    "type": "Scenario",
+    "topic": "Means-End Analysis",
+    "question": "A robot must move a box to a target shelf. It first notices the box is too far away, then plans to move beside it before pushing. This is an example of:",
+    "answer": "Means-End Analysis",
+    "options": [
+      "Breadth-First Search only",
+      "Means-End Analysis",
+      "Turing Test",
+      "Random-restart hill climbing"
+    ],
+    "explanation": "The robot identifies a difference from the goal and chooses subgoals/actions to reduce it.",
+    "hint": "It creates a subgoal that helps reduce the difference.",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 49,
+    "type": "MCQ",
+    "topic": "Means-End Analysis",
+    "question": "If an action cannot be performed because a required condition is missing, Means-End Analysis may:",
+    "answer": "Create a subgoal to satisfy the required condition",
+    "options": [
+      "Create a subgoal to satisfy the required condition",
+      "Declare every state a goal",
+      "Remove all operators",
+      "Stop checking differences permanently"
+    ],
+    "explanation": "A precondition can become a subgoal that must be achieved first.",
+    "hint": "What can be done when an action's preconditions are not met?",
+    "difficulty": "Medium"
+  },
+  {
+    "id": 50,
+    "type": "True/False",
+    "topic": "Means-End Analysis",
+    "question": "Means-End Analysis can use subgoals to reduce differences between the current state and the goal.",
+    "answer": "True",
+    "options": [
+      "True",
+      "False"
+    ],
+    "explanation": "Subgoals can help achieve the conditions needed to make progress toward the goal.",
+    "hint": "Subgoals break a larger task into steps.",
+    "difficulty": "Easy"
+  }
+]
+
+st.title("🧠 Interactive AI Quiz Game")
+st.caption("DSC401-6 Artificial Intelligence • Units I & II")
+st.write("Test your understanding of AI concepts through scenarios, search problems and quick questions.")
+
+with st.sidebar:
+    st.header("Quiz settings")
+    difficulty = st.selectbox("Choose difficulty", ["All", "Easy", "Medium"])
+    question_count = st.selectbox("Questions per attempt", [10, 15, 20, 25, 50], index=0)
+    shuffle_questions = st.checkbox("Randomize questions", value=True)
+    show_hints = st.checkbox("Enable hints", value=True)
+    st.markdown("---")
+    st.write("**Topics covered**")
+    st.caption("AI foundations • Agents • Environments • Search • Hill Climbing • Heuristics • CSP • Means-End Analysis")
+
+def normalize(value):
+    return " ".join(str(value).strip().lower().split())
+
+def prepare_quiz():
+    pool = [q.copy() for q in QUESTIONS if difficulty == "All" or q["difficulty"] == difficulty]
+    if shuffle_questions:
+        random.shuffle(pool)
+    return pool[:min(question_count, len(pool))]
+
+def reset_quiz():
+    st.session_state.quiz_questions = prepare_quiz()
+    st.session_state.current = 0
+    st.session_state.score = 0
+    st.session_state.responses = {}
+    st.session_state.submitted = False
+    st.session_state.finished = False
+    st.session_state.hint_used = set()
+
+if "quiz_questions" not in st.session_state:
+    reset_quiz()
+
+if st.session_state.get("settings", None) != (difficulty, question_count, shuffle_questions):
+    st.session_state.settings = (difficulty, question_count, shuffle_questions)
+    reset_quiz()
+
+quiz = st.session_state.quiz_questions
+
+if not quiz:
+    st.warning("No questions match this selection. Please choose another difficulty.")
+    st.stop()
+
+if st.session_state.finished:
+    total = len(quiz)
+    score = st.session_state.score
+    percentage = round((score / total) * 100) if total else 0
+    st.success("Quiz completed!")
+    st.metric("Final score", f"{score} / {total}", f"{percentage}%")
+    st.progress(percentage / 100)
+    if percentage >= 80:
+        st.write("🌟 Excellent work! You have a strong grasp of these concepts.")
+    elif percentage >= 60:
+        st.write("👍 Good effort. Review the questions you missed and try again.")
+    else:
+        st.write("📚 Keep practising. Review the explanations and try another attempt.")
+    st.subheader("Answer review")
+    for number, q in enumerate(quiz, start=1):
+        response = st.session_state.responses.get(q["id"], {})
+        with st.expander(f"{number}. {q['question']}"):
+            st.write(f"**Your answer:** {response.get('answer', 'Not answered')}")
+            st.write(f"**Correct answer:** {q['answer']}")
+            st.write(q["explanation"])
+    if st.button("🔁 Restart quiz", type="primary"):
+        reset_quiz()
+        st.rerun()
+    st.caption("This quiz is a learning aid. Review your course notes for your lecturer's exact terminology.")
+    st.stop()
+
+index = st.session_state.current
+q = quiz[index]
+total = len(quiz)
+
+st.progress((index + 1) / total)
+st.caption(f"Question {index + 1} of {total}  •  Topic: {q['topic']}  •  Type: {q['type']}  •  Difficulty: {q['difficulty']}")
+st.subheader(q["question"])
+
+if q["type"] == "Fill":
+    response = st.text_input("Type your answer", key=f"answer_{q['id']}", disabled=st.session_state.submitted)
+else:
+    options = q["options"][:]
+    if q["type"] == "Match":
+        pass
+    response = st.radio("Choose your answer", options, key=f"answer_{q['id']}", index=None, disabled=st.session_state.submitted)
+
+if show_hints and not st.session_state.submitted:
+    if st.button("💡 Show hint", key=f"hint_{q['id']}"):
+        st.session_state.hint_used.add(q["id"])
+    if q["id"] in st.session_state.hint_used:
+        st.info("Hint: " + q["hint"])
+
+if not st.session_state.submitted:
+    if st.button("Submit answer", type="primary"):
+        if response is None or not str(response).strip():
+            st.warning("Please enter or select an answer first.")
+        else:
+            if q["type"] == "Fill":
+                correct = normalize(response) in [normalize(q["answer"])] or normalize(response) in [normalize(x) for x in q.get("accepted", [])]
+            else:
+                correct = normalize(response) == normalize(q["answer"])
+            st.session_state.responses[q["id"]] = {"answer": response, "correct": correct}
+            if correct:
+                st.session_state.score += 1
+            st.session_state.submitted = True
+            st.rerun()
+else:
+    result = st.session_state.responses.get(q["id"], {})
+    if result.get("correct"):
+        st.success("Correct! +1 point")
+    else:
+        st.error("Not quite. The correct answer is: " + q["answer"])
+    st.info("**Explanation:** " + q["explanation"])
+    st.write(f"**Current score:** {st.session_state.score} / {index + 1}")
+    if index + 1 < total:
+        if st.button("Next question ➜", type="primary"):
+            st.session_state.current += 1
+            st.session_state.submitted = False
+            st.rerun()
+    else:
+        if st.button("See final result 🏁", type="primary"):
+            st.session_state.finished = True
+            st.rerun()
+
+with st.sidebar:
+    st.markdown("---")
+    st.metric("Current score", f"{st.session_state.score} / {index + (1 if st.session_state.submitted else 0)}")
+    st.caption("Submit each answer to see feedback. Your score updates automatically.")
